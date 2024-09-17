@@ -8,7 +8,7 @@ def get_previsao_tempo():
     Retorna a previsão do tempo para uma data específica.
     ---
     parameters:
-      - name: date
+      - name: data
         in: query
         type: string
         required: true
@@ -20,7 +20,7 @@ def get_previsao_tempo():
           application/json: 
             {"data": "2024-09-02", "previsao": "Chuva leve", "temperatura": "25ºC"}
       400:
-        description: Parâmetro `date` não fornecido ou inválido
+        description: Parâmetro `data` não fornecido ou inválido
     """
     date = request.args.get('date')
     if not date:
