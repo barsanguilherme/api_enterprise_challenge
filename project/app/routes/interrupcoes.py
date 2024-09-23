@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from app.utils.date_utils import get_date_param
 
 interrupcoes_bp = Blueprint('interrupcoes', __name__)
 
@@ -6,13 +7,14 @@ interrupcoes_bp = Blueprint('interrupcoes', __name__)
 def get_interrupcoes():
     """
     Retorna as interrupções de energia para uma data específica.
+
     ---
     parameters:
-      - name: data
+      - name: date
         in: query
         type: string
         required: true
-        description: Data para a qual deseja obter as interrupções de energia no formato YYYY-MM-DD
+        description: Data para a qual deseja obter as interrupções de energia no formato yyyy-MM-dd
     responses:
       200:
         description: Lista de interrupções para a data fornecida
@@ -41,11 +43,11 @@ def get_interrupcoes():
               }
             ]
       400:
-        description: Parâmetro 'data' não fornecido ou inválido
+        description: Parâmetro date não fornecido ou inválido
     """
-    data = request.args.get('data')
-    if not data:
-        return jsonify({"error": "Parâmetro 'data' é obrigatório"}), 400
+    date = get_date_param(request)
+    if not date:
+        return jsonify({"error": "Parâmetro 'date' é obrigatório ou está em formato inválido (use yyyy-MM-dd)."}), 400
 
     interrupcoes_exemplo = [
         {
@@ -70,9 +72,9 @@ def get_interrupcoes():
         }
     ]
 
-    interrupcoes_filtradas = [interrupcao for interrupcao in interrupcoes_exemplo if interrupcao["DatGeracaoConjuntoDados"] == data]
+    interrupcoes_filtradas = [i for i in interrupcoes_exemplo if i["DatGeracaoConjuntoDados"] == date]
 
     if not interrupcoes_filtradas:
-        return jsonify({"error": f"Não foram encontradas interrupções para a data {data}"}), 404
+        return jsonify({"error": f"Não foram encontradas interrupções para a data {date}"}), 404
 
     return jsonify(interrupcoes_filtradas), 200

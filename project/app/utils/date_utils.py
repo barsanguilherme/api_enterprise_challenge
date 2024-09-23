@@ -7,10 +7,17 @@ def validate_date(date_string):
     return re.match(pattern, date_string) is not None
 
 def get_date_param(request):
-    """Retorna a data passada como parâmetro ou a data atual no formato yyyy-MM-dd."""
+    """Retorna a data passada como parâmetro ou uma mensagem de erro se a data for inválida."""
     date = request.args.get('date')
+    
+    # Verifica se a data foi fornecida
     if not date:
+        # Retorna a data atual no formato yyyy-MM-dd
         date = datetime.now().strftime('%Y-%m-%d')
+    
+    # Valida o formato da data fornecida
     elif not validate_date(date):
-        return None  # Data inválida
-    return date
+        return "Data inválida"  # Retorna mensagem de data inválida
+    
+    return date  # Retorna a data válida
+
