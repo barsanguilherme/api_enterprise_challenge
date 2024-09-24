@@ -1,5 +1,7 @@
+import json
 from flask import Blueprint, request, jsonify
 from app.utils.date_utils import get_date_param
+import subprocess
 
 previsao_tempo_bp = Blueprint('previsao_tempo', __name__)
 
@@ -28,14 +30,26 @@ def get_previsao_tempo():
     if not date:
         return jsonify({"error": "Parâmetro 'date' é obrigatório ou está em formato inválido (use yyyy-MM-dd)."}), 400
 
-    # Simulação de dados de previsão do tempo
-    previsao = {
-        "data": date,
-        "previsao": "Chuva leve",
-        "temperatura": "25ºC"
-    }
+    url = "http://elasticgrupogpt.pagekite.me/dados_meterologicos_de_previsao_do_tempo/_search"
+    username = "elastic"
+    password = "HAJhdvYdi2iJTmzUyYI9"
 
-    return jsonify(previsao), 200
+    
 
+    curl_command = [
+        'curl',
+        '-u', 'elastic:HAJhdvYdi2iJTmzUyYI9',
+        '-X', 'GET',
+        'http://elasticgrupogpt.pagekite.me/dados_meterologicos_de_previsao_do_tempo/_search',
+        '-H', 'Content-Type: application/json',
+        '-d', ('{"query": {"exists": {"field": \"' + f"{date}*" + '\"}}}')
+    ]
 
+    # Execute the curl command
+    result = subprocess.run(curl_command, capture_output=True, text=True)
 
+    # Print the output and any errors
+
+    previsao = json.loads(result.stdout)
+    previsoes : list = [prev["_source"] for prev in previsao["hits"]["hits"]]
+    return jsonify(previsoes), 200
